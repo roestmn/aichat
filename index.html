@@ -18,20 +18,20 @@
             display: flex;
             flex-direction: column;
             color: white;
-            overflow: hidden;
         }
 
-        
         .header {
-            padding: 2rem;
+            padding: 1rem;
             text-align: center;
+            background: transparent;
+            backdrop-filter: blur(5px);
         }
 
         .header h1 {
             background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 2.5rem;
+            font-size: 1.7rem;
             font-weight: 800;
             letter-spacing: -1px;
         }
@@ -43,68 +43,53 @@
             max-width: 800px;
             margin: 0 auto;
             width: 100%;
-            backdrop-filter: blur(10px);
+            padding-bottom: 100px;
         }
 
         .message {
             margin: 15px 0;
-            display: flex;
             animation: fadeIn 0.3s ease-in;
         }
 
         .user-message {
-            justify-content: flex-end;
+            text-align: right;
         }
 
         .bot-message {
-            justify-content: flex-start;
-        }
-
-        .bubble {
-            max-width: 70%;
-            padding: 15px 20px;
-            border-radius: 25px;
-            position: relative;
-            line-height: 1.5;
-            transition: transform 0.2s ease;
+            text-align: center;
+            margin: 40px auto;
+            max-width: 90%;
+            width: fit-content;
         }
 
         .user-bubble {
+            display: inline-block;
+            padding: 15px 25px;
+            border-radius: 30px;
             background: linear-gradient(45deg, #2575fc 0%, #6a11cb 100%);
             color: white;
             box-shadow: 0 4px 15px rgba(37, 117, 252, 0.3);
         }
 
         .bot-bubble {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
+            font-size: 1.1em;
+            line-height: 1.6;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.05);
+            box-shadow: 0 4px 30px rgba(106, 17, 203, 0.2);
         }
 
-        .bubble::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            border-radius: 25px;
-            opacity: 0.3;
-        }
-
-        
         .input-container {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             padding: 20px;
-            background: transparent;
             display: flex;
             gap: 15px;
             justify-content: center;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
         }
 
         #user-input {
@@ -123,7 +108,6 @@
         #user-input:focus {
             outline: none;
             box-shadow: 0 8px 32px rgba(37, 117, 252, 0.5);
-            background: rgba(255,255,255,0.1);
         }
 
         #send-button {
@@ -134,7 +118,28 @@
             border-radius: 30px;
             cursor: pointer;
             transition: transform 0.2s ease;
-            box-shadow: 0 8px 32px rgba(106, 17, 203, 0.3);
+        }
+
+        .disclaimer {
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9em;
+            margin-bottom: 30px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .loading::after {
+            content: '...';
+            display: inline-block;
+            animation: dots 1s infinite;
         }
 
         @keyframes fadeIn {
@@ -142,12 +147,14 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
         }
 
-        ::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.1);
+        ::-webkit-scrollbar {
+            width: 8px;
         }
 
         ::-webkit-scrollbar-thumb {
@@ -161,14 +168,18 @@
         <h1>bebas.ai</h1>
     </div>
     
-    <div class="chat-container" id="chat-container"></div>
+    <div class="chat-container" id="chat-container">
+        <div class="disclaimer">
+            ⚠️ Ini hasil generate AI, informasi bisa saja keliru
+        </div>
+    </div>
     
     <div class="input-container">
         <input type="text" id="user-input" placeholder="Tanya apa aja ke bebas.ai...">
         <button id="send-button">Kirim</button>
     </div>
 
-      <script>
+    <script>
         const API_KEY = 'AIzaSyDGljaNj2RhkEqhLW125lVXghpmc_-lsG4';
         const chatContainer = document.getElementById('chat-container');
         const userInput = document.getElementById('user-input');
@@ -181,12 +192,19 @@
             appendMessage(message, 'user');
             userInput.value = '';
 
+            // biar ada loading
+            const loading = document.createElement('div');
+            loading.className = 'loading';
+            loading.textContent = 'Sedang memproses';
+            chatContainer.appendChild(loading);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
             try {
-                // Cek pertanyaan tentang pembuat
                 if (message.toLowerCase().includes('siapa yang buat') || 
                     message.toLowerCase().includes('kelompok 5') || 
                     message.toLowerCase().includes('pembuat')) {
-                    const teamResponse = "Kami dari Kelompok 5 X PPL 1! Anggotanya ada Rustaman si Tech Lead, Fahri sang Backend Master, Shelly si Design Queen, Salman the Problem Solver, dan Finsa sang Organizer! 😊";
+                    const teamResponse = "kelompok 5";
+                    loading.remove();
                     appendMessage(teamResponse, 'bot');
                     return;
                 }
@@ -200,7 +218,7 @@
                             contents: [{
                                 parts: [{ 
                                     text: `Berikan jawaban dengan bahasa santai dan mudah dipahami. kalo ada yang nanya siapa yang buat atau perkenalkan diri jawab Kami dari Kelompok 5 X PPL 1 SMKN 1 GARUT! Anggotanya ada Rustaman si Tech Lead, Fahri sang Backend Master, Shelly si Design Queen, Salman the Problem Solver, dan Finsa sang Organizer!  Gunakan emoji jika pertanyaannya relevan. Pertanyaan: ${message}`
-                                }]
+                                   }]
                             }]
                         })
                     }
@@ -208,9 +226,11 @@
 
                 const data = await response.json();
                 const botResponse = data.candidates[0].content.parts[0].text;
+                loading.remove();
                 appendMessage(botResponse, 'bot');
             } catch (error) {
                 console.error('Error:', error);
+                loading.remove();
                 appendMessage('Waduh error nih, coba lagi ya! 😅', 'bot');
             }
         }
@@ -220,7 +240,7 @@
             messageDiv.className = `message ${sender}-message`;
             
             const bubble = document.createElement('div');
-            bubble.className = `bubble ${sender}-bubble`;
+            bubble.className = `${sender === 'user' ? 'user-bubble' : 'bot-bubble'}`;
             bubble.innerHTML = text.replace(/\n/g, '<br>');
             
             messageDiv.appendChild(bubble);
@@ -229,7 +249,6 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        // Event listeners
         sendButton.addEventListener('click', sendMessage);
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
